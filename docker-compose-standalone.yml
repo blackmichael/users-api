@@ -1,0 +1,21 @@
+version: "3.9"
+services:
+  postgres:
+    image: postgres:12.2
+    container_name: users_pg
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: users
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+
+  api:
+    container_name: users_api
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      PG_HOST: users_pg
+    depends_on:
+      - postgres

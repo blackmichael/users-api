@@ -62,6 +62,6 @@ class Server(val config: Config, val usersService: UsersService) : Closeable {
 
     override fun close() {
         logger.info("shutting down server")
-        server.stop(Duration.ofSeconds(2).toMillis(), Duration.ofSeconds(10).toMillis())
+        server.stop(Duration.ofSeconds(1).toMillis(), Duration.ofSeconds(1).toMillis())
     }
 }

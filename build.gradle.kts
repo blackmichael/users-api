@@ -1,4 +1,3 @@
-import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.gradle.api.tasks.testing.logging.TestLogEvent
 
@@ -8,11 +7,11 @@ plugins {
     application
 
     id("org.jlleitschuh.gradle.ktlint") version "9.2.1"
-    id("com.github.johnrengelman.shadow") version "5.2.0"
+    id("com.github.johnrengelman.shadow") version "6.1.0"
 }
 
 application {
-    mainClass.set("users.api.ApplicationKt")
+    mainClassName = "users.api.ApplicationKt"
 }
 
 repositories {
@@ -44,14 +43,6 @@ dependencies {
     testImplementation("io.kotest:kotest-runner-junit5-jvm:4.3.2")
     testImplementation("org.junit.jupiter:junit-jupiter:5.6.0")
     testImplementation("io.kotest:kotest-assertions-core-jvm:4.3.2")
-}
-
-val build: DefaultTask by tasks
-val shadowJar: ShadowJar by tasks
-
-build.dependsOn(shadowJar)
-shadowJar.apply {
-    archiveName = "users-api.jar"
 }
 
 tasks.withType<Test> {
