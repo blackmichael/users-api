@@ -28,6 +28,10 @@ dependencies {
     implementation("io.ktor:ktor-server-netty:1.4.3")
     implementation("io.ktor:ktor-jackson:1.4.3")
     implementation("io.github.config4k:config4k:0.4.2")
+    implementation("com.zaxxer:HikariCP:4.0.0")
+    implementation("org.postgresql:postgresql:42.2.18")
+    implementation("org.jooq:jooq:3.13.6")
+    implementation("org.flywaydb:flyway-core:6.3.2")
 
     implementation("io.github.microutils:kotlin-logging:1.12.0")
     implementation("org.slf4j:slf4j-api:1.7.29")

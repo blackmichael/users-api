@@ -1,0 +1,78 @@
+swagger: "2.0"
+info:
+  description: "A simple web API that manages information about users and 'likes' between users."
+  version: "1.0.0"
+  title: "Users API"
+basePath: "/"
+schemes:
+  - "https"
+  - "http"
+paths:
+  /users:
+    post:
+      tags:
+        - "Users"
+      summary: "Create a user"
+      operationId: "createUser"
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - in: "body"
+          name: "body"
+          description: "Details about the new user"
+          required: true
+          schema:
+            $ref: "#/definitions/UserRequest"
+      responses:
+        "200":
+          description: "Success"
+          schema:
+            $ref: "#/definitions/UserResponse"
+        "400":
+          description: "Invalid request"
+  /users/{userId}:
+    get:
+      tags:
+        - "Users"
+      summary: "Get a user"
+      operationId: "GetUserById"
+      produces:
+        - "application/json"
+      parameters:
+        - in: "path"
+          name: "userId"
+          description: "ID of the user"
+          required: true
+          type: "string"
+      responses:
+        "200":
+          description: "Success"
+          schema:
+            $ref: "#/definitions/UserResponse"
+        "400":
+          description: "Invalid request"
+definitions:
+  UserRequest:
+    type: "object"
+    properties:
+      first_name:
+        type: "string"
+      last_name:
+        type: "string"
+      is_test:
+        type: "boolean"
+        default: "false"
+  UserResponse:
+    type: "object"
+    properties:
+      id:
+        type: "string"
+        format: "uuid"
+      firstName:
+        type: "string"
+      lastName:
+        type: "string"
+      is_test:
+        type: "boolean"

@@ -7,7 +7,7 @@ import io.ktor.response.respond
 import io.ktor.routing.get
 import io.ktor.routing.routing
 
-fun Application.healthEndpoint() {
+fun Application.healthHandler() {
     routing {
         get("/health") {
             call.respond(HttpStatusCode.OK, mapOf("status" to "UP"))

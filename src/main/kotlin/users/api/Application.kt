@@ -4,12 +4,15 @@ import com.typesafe.config.ConfigFactory
 import io.github.config4k.extract
 import java.io.Closeable
 import kotlin.system.exitProcess
+import users.api.domain.service.UsersService
+import users.api.postgres.PostgresService
 import users.api.server.Server
 
-class Application() : Closeable {
-
-    val config = ConfigFactory.load()
-    val server = Server(config.extract("http.server"))
+class Application : Closeable {
+    private val config = ConfigFactory.load()
+    val postgresService = PostgresService(config.extract("postgres"))
+    private val usersService = UsersService(postgresService)
+    val server = Server(config.extract("http.server"), usersService)
 
     fun start() {
         server.start()

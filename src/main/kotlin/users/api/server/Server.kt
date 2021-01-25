@@ -16,9 +16,11 @@ import io.ktor.server.netty.Netty
 import java.io.Closeable
 import java.time.Duration
 import mu.KotlinLogging
-import users.api.server.handler.healthEndpoint
+import users.api.domain.service.UsersService
+import users.api.server.handler.healthHandler
+import users.api.server.handler.usersHandler
 
-class Server(val config: Config) : Closeable {
+class Server(val config: Config, val usersService: UsersService) : Closeable {
     data class Config(
         val port: Int,
         val host: String
@@ -37,12 +39,20 @@ class Server(val config: Config) : Closeable {
             }
         }
         install(StatusPages) {
-            exception<Throwable> { cause ->
-                call.respond(HttpStatusCode.InternalServerError, mapOf("message" to cause.message))
+            exception<ResourceNotFoundException> {
+                call.respond(HttpStatusCode.NotFound, mapOf("message" to it.message))
+            }
+            exception<BadRequestException> {
+                call.respond(HttpStatusCode.BadRequest, mapOf("message" to it.message))
+            }
+            exception<Throwable> {
+                logger.error { "server encountered an uncaught error: ${it.message}" }
+                call.respond(HttpStatusCode.InternalServerError, mapOf("message" to "something went wrong"))
             }
         }
 
-        healthEndpoint()
+        healthHandler()
+        usersHandler(usersService)
     }
 
     fun start() {
