@@ -41,6 +41,13 @@ curl --request POST --url http://localhost:8080/users --header 'Content-Type: ap
 curl --request GET --url http://localhost:8080/users/6c81c32a-b98f-4190-8317-26c5765b272d
 ```
 
+#### Like User
+```
+curl --request POST --url http://localhost:8080/users/d175fc39-398e-4495-92a7-833344ab2b5e/likes --header 'Content-Type: application/json' --data '{
+	"liked_by_user_id": "2cfc99a3-dd3c-4fe6-b5e7-010d3335d034"
+}'
+```
+
 ## Development Setup
 To install make sure you have the following installed:
 - Java 13 

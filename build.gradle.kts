@@ -26,6 +26,7 @@ dependencies {
 
     implementation("io.ktor:ktor-server-netty:1.4.3")
     implementation("io.ktor:ktor-jackson:1.4.3")
+    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.10.2")
     implementation("io.github.config4k:config4k:0.4.2")
     implementation("com.zaxxer:HikariCP:4.0.0")
     implementation("org.postgresql:postgresql:42.2.18")

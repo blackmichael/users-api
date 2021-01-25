@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.PropertyNamingStrategy
 import com.fasterxml.jackson.databind.SerializationFeature
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.kotest.matchers.shouldBe
 import kotlin.random.Random
@@ -13,6 +14,7 @@ val jackson: ObjectMapper = jacksonObjectMapper()
     .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
     .enable(SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS)
     .setPropertyNamingStrategy(PropertyNamingStrategy.SNAKE_CASE)
+    .registerModule(JavaTimeModule())
 
 infix fun String.shouldBeJson(other: Any) =
     this shouldBe jackson.writeValueAsString(other)

@@ -26,7 +26,7 @@ paths:
           schema:
             $ref: "#/definitions/UserRequest"
       responses:
-        "200":
+        "201":
           description: "Success"
           schema:
             $ref: "#/definitions/UserResponse"
@@ -53,7 +53,83 @@ paths:
             $ref: "#/definitions/UserResponse"
         "400":
           description: "Invalid request"
+  /users/{userId}/likes:
+    post:
+      tags:
+        - "Users"
+      summary: "Like a user"
+      operationId: "likeUser"
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - in: "body"
+          name: "body"
+          description: "Details about the user who is liking another"
+          required: true
+          schema:
+            $ref: "#/definitions/LikeUserRequest"
+        - in: "path"
+          name: "userId"
+          description: "ID of the liked user"
+          required: true
+          type: "string"
+      responses:
+        "201":
+          description: "Success"
+          schema:
+            $ref: "#/definitions/LikeUserResponse"
+        "400":
+          description: "Invalid request"
+    get:
+      tags:
+        - "Users"
+      summary: "Get users that have liked a given user"
+      description: "Gets a paginated list of users that have liked the given user"
+      operationId: "GetUserLikesByID"
+      produces:
+        - "application/json"
+      parameters:
+        - in: "path"
+          name: "userId"
+          description: "ID of the user"
+          required: true
+          type: "string"
+        - in: "query"
+          name: "page"
+          description: "Result page to retrieve, zero-based"
+          required: false
+          default: "0"
+          type: "integer"
+        - in: "query"
+          name: "per_page"
+          description: "Number of results per page"
+          required: false
+          default: "20"
+          type: "integer"
+      responses:
+        "200":
+          description: "Success"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/UserResponse"
+        "400":
+          description: "Invalid request"
 definitions:
+  LikeUserRequest:
+    type: "object"
+    properties:
+      liked_by_user_id:
+        type: "string"
+  LikeUserResponse:
+    type: "object"
+    properties:
+      liked_by_user_id:
+        type: "string"
+      liked_user_id:
+        type: "string"
   UserRequest:
     type: "object"
     properties:

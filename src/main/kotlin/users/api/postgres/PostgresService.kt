@@ -3,6 +3,7 @@ package users.api.postgres
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import java.io.Closeable
+import java.sql.Timestamp
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import mu.KotlinLogging
@@ -11,6 +12,7 @@ import org.jooq.DSLContext
 import org.jooq.SQLDialect
 import org.jooq.impl.DSL
 import users.api.domain.model.User
+import users.api.domain.model.UserLike
 
 /**
  * Persistence layer service responsible for maintaining the PostgreSQL integration and applying migrations.
@@ -33,6 +35,17 @@ class PostgresService(val config: Config) : Closeable {
 
     companion object {
         val logger = KotlinLogging.logger { }
+
+        private val usersTable = DSL.table("users")
+        private val idField = DSL.field("id", String::class.java)
+        private val firstNameField = DSL.field("first_name", String::class.java)
+        private val lastNameField = DSL.field("last_name", String::class.java)
+        private val isTestField = DSL.field("is_test", Boolean::class.java)
+
+        private val likesTable = DSL.table("likes")
+        private val likedUserIdField = DSL.field("liked_user_id", String::class.java)
+        private val likedByUserIdField = DSL.field("liked_by_user_id", String::class.java)
+        private val likedAtField = DSL.field("liked_at", Timestamp::class.java)
     }
 
     private val dataSource = HikariDataSource(
@@ -73,11 +86,11 @@ class PostgresService(val config: Config) : Closeable {
     suspend fun createUser(user: User) =
         suspendedTxn("insert user") {
             insertInto(
-                DSL.table("users"),
-                DSL.field("id"),
-                DSL.field("first_name"),
-                DSL.field("last_name"),
-                DSL.field("is_test")
+                usersTable,
+                idField,
+                firstNameField,
+                lastNameField,
+                isTestField
             )
                 .values(
                     user.id,
@@ -98,10 +111,60 @@ class PostgresService(val config: Config) : Closeable {
     suspend fun getUser(id: String): User? =
         suspendedTxn("get user by id") {
             select()
-                .from(DSL.table("users"))
-                .where(DSL.field("id").eq(id))
+                .from(usersTable)
+                .where(idField.eq(id))
                 .fetchOne()
                 ?.toUser()
+        }
+
+    /**
+     * Inserts a "like" which represents a relationship between two records in the users table.
+     *
+     * @param userLike a representation of when a user liked another user
+     */
+    suspend fun createLike(userLike: UserLike) {
+        suspendedTxn("insert like") {
+            insertInto(
+                likesTable,
+                likedUserIdField,
+                likedByUserIdField,
+                likedAtField
+            )
+                .values(
+                    userLike.likedUserId,
+                    userLike.likedByUserId,
+                    Timestamp(userLike.likedAt.toEpochMilli())
+                )
+                .execute()
+        }
+    }
+
+    /**
+     * Selects all of the users who have liked the given user ID.
+     *
+     * @param likedUserId
+     *
+     * @return a list of users
+     */
+    suspend fun getLikes(likedUserId: String): List<User> =
+        suspendedTxn("select liked by users") {
+            select(
+                idField,
+                firstNameField,
+                lastNameField,
+                isTestField
+            )
+                .from(
+                    likesTable
+                        .join(usersTable)
+                        .on(likedByUserIdField.eq(idField))
+                )
+                .where(likedUserIdField.eq(likedUserId))
+                .orderBy(likedAtField)
+                .fetch()
+                .map {
+                    it.toUser()
+                }
         }
 
     /**

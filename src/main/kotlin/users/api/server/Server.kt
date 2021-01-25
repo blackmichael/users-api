@@ -3,6 +3,7 @@ package users.api.server
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.PropertyNamingStrategy
 import com.fasterxml.jackson.databind.SerializationFeature
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import io.ktor.application.call
 import io.ktor.application.install
 import io.ktor.features.ContentNegotiation
@@ -20,7 +21,10 @@ import users.api.domain.service.UsersService
 import users.api.server.handler.healthHandler
 import users.api.server.handler.usersHandler
 
-class Server(val config: Config, val usersService: UsersService) : Closeable {
+/**
+ * Configures the application's HTTP server and defines all endpoints for it.
+ */
+class Server(val config: Config, private val usersService: UsersService) : Closeable {
     data class Config(
         val port: Int,
         val host: String
@@ -31,13 +35,18 @@ class Server(val config: Config, val usersService: UsersService) : Closeable {
     }
 
     private val server: ApplicationEngine = embeddedServer(Netty, config.port, config.host) {
+        // request/response serde
         install(ContentNegotiation) {
             jackson {
-                disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+                enable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+                enable(SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS)
                 disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+                registerModule(JavaTimeModule())
                 propertyNamingStrategy = PropertyNamingStrategy.SNAKE_CASE
             }
         }
+
+        // exception handling for both expected and unexpected errors
         install(StatusPages) {
             exception<ResourceNotFoundException> {
                 call.respond(HttpStatusCode.NotFound, mapOf("message" to it.message))
@@ -51,6 +60,7 @@ class Server(val config: Config, val usersService: UsersService) : Closeable {
             }
         }
 
+        // handlers
         healthHandler()
         usersHandler(usersService)
     }
@@ -62,6 +72,9 @@ class Server(val config: Config, val usersService: UsersService) : Closeable {
 
     override fun close() {
         logger.info("shutting down server")
-        server.stop(Duration.ofSeconds(1).toMillis(), Duration.ofSeconds(1).toMillis())
+        server.stop(
+            gracePeriodMillis = Duration.ofSeconds(1).toMillis(),
+            timeoutMillis = Duration.ofSeconds(2).toMillis()
+        )
     }
 }

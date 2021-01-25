@@ -1,8 +1,5 @@
 package users.api.test
 
-import com.fasterxml.jackson.databind.DeserializationFeature
-import com.fasterxml.jackson.databind.PropertyNamingStrategy
-import com.fasterxml.jackson.databind.SerializationFeature
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.apache.Apache
 import io.ktor.client.features.json.JacksonSerializer
@@ -20,11 +17,7 @@ class TestClient(private val baseUri: String) : Closeable {
 
     private val client = HttpClient(Apache) {
         install(JsonFeature) {
-            serializer = JacksonSerializer() {
-                disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-                disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
-                propertyNamingStrategy = PropertyNamingStrategy.SNAKE_CASE
-            }
+            serializer = JacksonSerializer(jackson)
         }
         expectSuccess = false
     }

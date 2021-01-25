@@ -3,9 +3,9 @@ package users.api.test
 import org.jooq.DSLContext
 import org.jooq.impl.DSL
 
-class PostgresHelper(val context: DSLContext) {
+class PostgresHelper(private val context: DSLContext) {
 
-    fun deleteAllUsers() {
-        context.truncate(DSL.table("users"))
+    fun deleteAll() {
+        context.truncate(DSL.table("users")).cascade().execute()
     }
 }
