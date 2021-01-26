@@ -232,6 +232,32 @@ class FunctionalTestSuite {
         totalResponse shouldContainExactlyInAnyOrder users
     }
 
+    @Test
+    fun `test get likes - 400 invalid page query param`() {
+        val response1 = harness.client.get("/users/${UUID.randomUUID()}/likes?page=a&per_page=10")
+        response1.status shouldBe 400
+        response1.body shouldBeJson mapOf("message" to "page must be numerical")
+
+        val response2 = harness.client.get("/users/${UUID.randomUUID()}/likes?page=-1&per_page=10")
+        response2.status shouldBe 400
+        response2.body shouldBeJson mapOf("message" to "page must not be negative")
+    }
+
+    @Test
+    fun `test get likes - 400 invalid per_page query param`() {
+        val response1 = harness.client.get("/users/${UUID.randomUUID()}/likes?page=0&per_page=a")
+        response1.status shouldBe 400
+        response1.body shouldBeJson mapOf("message" to "per_page must be numerical")
+
+        val response2 = harness.client.get("/users/${UUID.randomUUID()}/likes?page=0&per_page=0")
+        response2.status shouldBe 400
+        response2.body shouldBeJson mapOf("message" to "per_page must be positive")
+
+        val response3 = harness.client.get("/users/${UUID.randomUUID()}/likes?page=0&per_page=-1")
+        response3.status shouldBe 400
+        response3.body shouldBeJson mapOf("message" to "per_page must be positive")
+    }
+
     private fun createRandomUser(request: Map<String, Any>? = null): User {
         val req = request ?: mapOf(
             "first_name" to randomString(),
