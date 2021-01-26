@@ -72,11 +72,26 @@ class UsersService(private val postgresService: PostgresService) {
      *
      * @return a list of users who have liked the given user, possibly empty
      */
-    suspend fun getUserLikes(likedUserId: String): List<User> {
+    suspend fun getUserLikes(likedUserId: String, page: Int?, perPage: Int?): List<User> {
         logger.debug { "getting user likes" }
+
+        page?.let {
+            if (it < 0) {
+                throw BadRequestException("page must not be negative")
+            }
+        }
+
+        perPage?.let {
+            if (it <= 0) {
+                throw BadRequestException("per_page must be positive")
+            }
+        }
 
         getUser(likedUserId) ?: throw ResourceNotFoundException("liked user was not found")
 
-        return postgresService.getLikes(likedUserId)
+        val defaultedPage = page ?: 0
+        val defaultedPerPage = perPage ?: 20
+
+        return postgresService.getLikes(likedUserId, defaultedPage, defaultedPerPage)
     }
 }

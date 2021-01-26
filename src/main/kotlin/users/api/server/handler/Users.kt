@@ -17,6 +17,9 @@ import users.api.server.ResourceNotFoundException
 fun Application.usersHandler(usersService: UsersService) {
     val userIdParamName = "userId"
 
+    val pageQueryParamName = "page"
+    val perPageQueryParamName = "per_page"
+
     routing {
 
         /**
@@ -72,8 +75,18 @@ fun Application.usersHandler(usersService: UsersService) {
          */
         get("/users/{$userIdParamName}/likes") {
             val likedUserId = call.parameters[userIdParamName] ?: throw BadRequestException("missing user id param")
+            val page = try {
+                call.request.queryParameters[pageQueryParamName]?.toInt()
+            } catch (e: NumberFormatException) {
+                throw BadRequestException("page must be numerical")
+            }
+            val perPage = try {
+                call.request.queryParameters[perPageQueryParamName]?.toInt()
+            } catch (e: NumberFormatException) {
+                throw BadRequestException("per_page must be numerical")
+            }
 
-            val likes = usersService.getUserLikes(likedUserId)
+            val likes = usersService.getUserLikes(likedUserId, page, perPage)
 
             call.respond(HttpStatusCode.OK, likes)
         }

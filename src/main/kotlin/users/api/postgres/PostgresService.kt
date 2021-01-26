@@ -146,7 +146,7 @@ class PostgresService(val config: Config) : Closeable {
      *
      * @return a list of users
      */
-    suspend fun getLikes(likedUserId: String): List<User> =
+    suspend fun getLikes(likedUserId: String, page: Int, perPage: Int): List<User> =
         suspendedTxn("select liked by users") {
             select(
                 idField,
@@ -161,6 +161,8 @@ class PostgresService(val config: Config) : Closeable {
                 )
                 .where(likedUserIdField.eq(likedUserId))
                 .orderBy(likedAtField)
+                .limit(perPage)
+                .offset(getOffset(page, perPage))
                 .fetch()
                 .map {
                     it.toUser()
@@ -182,6 +184,15 @@ class PostgresService(val config: Config) : Closeable {
                 DSL.using(configuration).block()
             }
         }
+
+    /**
+     * Returns the offset to be used given the [currentPage] and how many records are in each page ([perPage]).
+     *
+     * @param currentPage zero-based page number
+     * @param perPage number of records per page
+     */
+    private fun getOffset(currentPage: Int, perPage: Int): Int =
+        currentPage * perPage
 
     override fun close() {
         logger.info("closing postgres service")

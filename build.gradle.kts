@@ -53,8 +53,7 @@ tasks.withType<Test> {
         events = setOf(
             TestLogEvent.FAILED,
             TestLogEvent.PASSED,
-            TestLogEvent.SKIPPED,
-            TestLogEvent.STANDARD_OUT
+            TestLogEvent.SKIPPED
         )
 
         exceptionFormat = TestExceptionFormat.FULL

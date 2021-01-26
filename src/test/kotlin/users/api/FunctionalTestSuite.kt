@@ -1,6 +1,7 @@
 package users.api
 
 import com.fasterxml.jackson.module.kotlin.readValue
+import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import java.util.UUID
@@ -162,14 +163,14 @@ class FunctionalTestSuite {
     }
 
     @Test
-    fun `test get likes - 200`() {
+    fun `test get likes - 200 default pagination`() {
         val user1 = createRandomUser()
         val user2 = createRandomUser()
         val user3 = createRandomUser()
 
         createLike(user1, user3)
         // create a delay between likes
-        runBlocking { delay(1000) }
+        runBlocking { delay(10) }
         createLike(user1, user2)
 
         val response = harness.client.get("/users/${user1.id}/likes")
@@ -177,6 +178,52 @@ class FunctionalTestSuite {
 
         val responseBody = jackson.readValue<List<User>>(response.body)
         responseBody shouldBeJson listOf(user3, user2)
+    }
+
+    @Test
+    fun `test get likes - 200 paginated results`() {
+        val user = createRandomUser()
+        val users = (1..95).map { createRandomUser() }
+        users.forEach {
+            createLike(user, it)
+                .also {
+                    runBlocking { delay(10) }
+                }
+        }
+
+        // first page
+        val response1 = harness.client.get("/users/${user.id}/likes?page=0&per_page=20")
+        response1.status shouldBe 200
+        val responseBody1 = jackson.readValue<List<User>>(response1.body)
+        responseBody1.size shouldBe 20
+
+        // second page
+        val response2 = harness.client.get("/users/${user.id}/likes?page=1&per_page=20")
+        response2.status shouldBe 200
+        val responseBody2 = jackson.readValue<List<User>>(response2.body)
+        responseBody2.size shouldBe 20
+
+        // third page
+        val response3 = harness.client.get("/users/${user.id}/likes?page=2&per_page=20")
+        response3.status shouldBe 200
+        val responseBody3 = jackson.readValue<List<User>>(response3.body)
+        responseBody3.size shouldBe 20
+
+        // fourth page
+        val response4 = harness.client.get("/users/${user.id}/likes?page=3&per_page=20")
+        response4.status shouldBe 200
+        val responseBody4 = jackson.readValue<List<User>>(response4.body)
+        responseBody4.size shouldBe 20
+
+        // fifth page
+        val response5 = harness.client.get("/users/${user.id}/likes?page=4&per_page=20")
+        response5.status shouldBe 200
+        val responseBody5 = jackson.readValue<List<User>>(response5.body)
+        // remaining likes
+        responseBody5.size shouldBe 15
+
+        val totalResponse = (responseBody1 + responseBody2 + responseBody3 + responseBody4 + responseBody5)
+        totalResponse shouldContainExactlyInAnyOrder users
     }
 
     private fun createRandomUser(request: Map<String, Any>? = null): User {
