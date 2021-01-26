@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import io.ktor.application.call
 import io.ktor.application.install
+import io.ktor.features.CallLogging
 import io.ktor.features.ContentNegotiation
 import io.ktor.features.StatusPages
 import io.ktor.http.HttpStatusCode
@@ -17,6 +18,7 @@ import io.ktor.server.netty.Netty
 import java.io.Closeable
 import java.time.Duration
 import mu.KotlinLogging
+import org.slf4j.event.Level
 import users.api.domain.service.UsersService
 import users.api.server.handler.healthHandler
 import users.api.server.handler.usersHandler
@@ -44,6 +46,11 @@ class Server(val config: Config, private val usersService: UsersService) : Close
                 registerModule(JavaTimeModule())
                 propertyNamingStrategy = PropertyNamingStrategy.SNAKE_CASE
             }
+        }
+
+        // logging
+        install(CallLogging) {
+            level = Level.INFO
         }
 
         // exception handling for both expected and unexpected errors

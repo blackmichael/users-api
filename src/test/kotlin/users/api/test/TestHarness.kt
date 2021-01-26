@@ -4,20 +4,29 @@ import java.io.Closeable
 import java.net.ServerSocket
 import users.api.Application
 
+/**
+ * Spins up the API HTTP server for functional testing. Provides utility classes for making HTTP requests against the
+ * server and cleaning up PostgreSQL data.
+ */
 class TestHarness : Closeable {
 
-    val openPort: Int = ServerSocket(0)
-        .use {
-            it.reuseAddress = true
-            it.localPort
-        }
-        .also {
-            System.setProperty("http.server.port", "$it")
+    private val application: Application
+        get() {
+            // this needs to be evaluated before the Application object is created
+            // so that the system property is set for the random open server port
+            ServerSocket(0)
+                .use {
+                    it.reuseAddress = true
+                    it.localPort
+                }
+                .also {
+                    System.setProperty("http.server.port", "$it")
+                }
+
+            return Application()
         }
 
-    val application = Application()
-
-    val baseUri by lazy {
+    private val baseUri by lazy {
         "http://localhost:${application.server.config.port}"
     }
 

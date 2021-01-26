@@ -7,6 +7,7 @@ import io.kotest.matchers.shouldNotBe
 import java.util.UUID
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
+import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
@@ -24,6 +25,11 @@ class FunctionalTestSuite {
     @BeforeEach
     fun beforeEach() {
         harness.postgresHelper.deleteAll()
+    }
+
+    @AfterAll
+    fun afterAll() {
+        harness.close()
     }
 
     @Test

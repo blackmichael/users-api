@@ -7,6 +7,9 @@ import io.ktor.response.respond
 import io.ktor.routing.get
 import io.ktor.routing.routing
 
+/**
+ * Defines a health endpoint for the Application receiver.
+ */
 fun Application.healthHandler() {
     routing {
         get("/health") {

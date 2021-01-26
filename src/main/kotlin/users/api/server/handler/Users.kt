@@ -14,6 +14,11 @@ import users.api.domain.service.UsersService
 import users.api.server.BadRequestException
 import users.api.server.ResourceNotFoundException
 
+/**
+ * Defines user endpoints for the Application receiver.
+ *
+ * @param usersService domain service for handling user logic
+ */
 fun Application.usersHandler(usersService: UsersService) {
     val userIdParamName = "userId"
 
@@ -93,20 +98,30 @@ fun Application.usersHandler(usersService: UsersService) {
     }
 }
 
+/**
+ * Request schema for POST /users
+ */
 data class CreateUserRequest(
     val firstName: String,
     val lastName: String,
     val isTest: Boolean = false
-)
+) {
 
-fun CreateUserRequest.toUser(): User =
-    User(
-        id = UUID.randomUUID().toString(),
-        firstName = this.firstName,
-        lastName = this.lastName,
-        isTest = this.isTest
-    )
+    /**
+     * Mapping function to convert a request into a [User] domain object.
+     */
+    fun toUser(): User =
+        User(
+            id = UUID.randomUUID().toString(),
+            firstName = this.firstName,
+            lastName = this.lastName,
+            isTest = this.isTest
+        )
+}
 
+/**
+ * Request schema for POST /users/:userId/likes
+ */
 data class LikeUserRequest(
     val likedByUserId: String
 )
