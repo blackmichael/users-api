@@ -25,6 +25,9 @@ tests against the API, it is also intended to be readable to determine how to in
 However, there is also an [OpenAPI "Swagger" spec](https://swagger.io/specification/) under `api-spec/`.
 Swagger specs can be easily viewed at https://editor.swagger.io/ in addition to some IDE plugins.
 
+If you're a fan of [Insomnia](https://insomnia.rest/), then there is an insomnia collection under `insomnia/` that
+you can import into your client.
+
 Finally, there are tried-and-true curl commands as well.
 
 #### Create User
@@ -46,6 +49,11 @@ curl --request GET --url http://localhost:8080/users/6c81c32a-b98f-4190-8317-26c
 curl --request POST --url http://localhost:8080/users/d175fc39-398e-4495-92a7-833344ab2b5e/likes --header 'Content-Type: application/json' --data '{
 	"liked_by_user_id": "2cfc99a3-dd3c-4fe6-b5e7-010d3335d034"
 }'
+```
+
+#### Get User's Likes
+```
+curl --request GET --url 'http://localhost:8080/users/38ac674a-a54b-4156-805f-b9834c39a553/likes?page=0&per_page=10
 ```
 
 ## Development Setup
