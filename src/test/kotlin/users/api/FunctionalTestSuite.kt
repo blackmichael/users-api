@@ -112,7 +112,6 @@ class FunctionalTestSuite {
         val response = harness.client.post("/users/${user1.id}/likes", request)
         response.status shouldBe 201
 
-        println(response.body)
         val responseBody = jackson.readValue<UserLike>(response.body)
         responseBody.likedUserId shouldBe user1.id
         responseBody.likedByUserId shouldBe user2.id
